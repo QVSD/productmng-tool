@@ -34,7 +34,7 @@ public class Product {
      * The display name of the product.
      * Cannot be null.
      */
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     /**

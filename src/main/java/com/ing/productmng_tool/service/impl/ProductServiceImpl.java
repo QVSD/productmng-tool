@@ -9,6 +9,9 @@ import com.ing.productmng_tool.model.entity.dto.ProductRequest;
 import com.ing.productmng_tool.model.entity.dto.ProductResponse;
 import com.ing.productmng_tool.repository.ProductRepository;
 import com.ing.productmng_tool.service.ProductService;
+import jakarta.persistence.OptimisticLockException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,8 @@ import java.util.List;
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     private final ProductRepository repository;
     private final ProductMapper mapper;
@@ -61,8 +66,10 @@ public class ProductServiceImpl implements ProductService {
 
         try {
             Product saved = repository.save(product);
+            log.info("Product created id={} name='{}' price={}", saved.getId(), saved.getName(), saved.getPrice());
             return mapper.toResponse(saved);
         } catch (DataIntegrityViolationException ex) {
+            log.warn("Create product rejected - duplicate name='{}'", request.name());
             throw new DuplicateProductException("Product with this name already exists");
         }
     }
@@ -114,12 +121,20 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse changePrice(Long id, ChangePriceRequest request) {
 
         Product product = repository.findById(id)
-                .orElseThrow(() ->
-                        new ProductNotFoundException("Product not found with id: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
 
+        var oldPrice = product.getPrice();
         product.setPrice(request.newPrice());
 
-        return mapper.toResponse(product);
+        try {
+            Product updated = repository.save(product);
+            log.info("Product price changed id={} oldPrice={} newPrice={}",
+                    updated.getId(), oldPrice, updated.getPrice());
+            return mapper.toResponse(updated);
+        } catch (OptimisticLockException e) {
+            log.warn("Concurrent update detected for product id={}", id);
+            throw new OptimisticLockException("Product was updated concurrently. Please retry.");
+        }
     }
 
     /**
@@ -130,11 +145,12 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public void deleteProduct(Long id) {
+        if (!repository.existsById(id)) {
+            log.warn("Delete product refused - not found id={}", id);
+            throw new ProductNotFoundException("There was no product found with id: " + id);
+        }
 
-        Product product = repository.findById(id)
-                .orElseThrow(() ->
-                        new ProductNotFoundException("Product not found with id: " + id));
-
-        repository.delete(product);
+        repository.deleteById(id);
+        log.info("Product deleted id={}", id);
     }
 }

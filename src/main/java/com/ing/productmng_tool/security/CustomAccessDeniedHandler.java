@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -17,6 +19,8 @@ import java.time.LocalDateTime;
 //403
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(CustomAccessDeniedHandler.class);
 
     private final ObjectMapper objectMapper;
 
@@ -40,6 +44,11 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        String user = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "unknown";
+        log.warn("Forbidden access user={} path={} remoteIp={}",
+                user,
+                request.getRequestURI(),
+                request.getRemoteAddr());
         objectMapper.writeValue(response.getOutputStream(), payload);
     }
 }

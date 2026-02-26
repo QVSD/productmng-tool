@@ -19,5 +19,5 @@ server:
   port: 8080
 
 logging:
-  level:
-    org.springframework: INFO
+  pattern:
+    level: "%5p [${spring.application.name:app},%X{correlationId}]"

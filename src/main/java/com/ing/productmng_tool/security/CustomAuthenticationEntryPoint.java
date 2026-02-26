@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -16,6 +18,8 @@ import java.time.LocalDateTime;
 //401
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private static final Logger log = LoggerFactory.getLogger(CustomAuthenticationEntryPoint.class);
 
     private final ObjectMapper objectMapper;
 
@@ -39,6 +43,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        log.warn("Unauthorized access attempt path={} remoteIp={}",
+                request.getRequestURI(),
+                request.getRemoteAddr());
         objectMapper.writeValue(response.getOutputStream(), payload);
     }
 }
