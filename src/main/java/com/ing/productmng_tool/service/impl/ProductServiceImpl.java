@@ -115,7 +115,6 @@ public class ProductServiceImpl implements ProductService {
      * @param id      product identifier
      * @param request request containing the new price
      * @return updated product as response DTO
-     * @throws ProductNotFoundException if the product does not exist
      */
     @Override
     public ProductResponse changePrice(Long id, ChangePriceRequest request) {
