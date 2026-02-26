@@ -9,6 +9,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import jakarta.persistence.OptimisticLockException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -83,6 +85,15 @@ public class GlobalExceptionHandler {
         return buildResponse("An unexpected error occurred",
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 request);
+    }
+
+    @ExceptionHandler({OptimisticLockException.class, ObjectOptimisticLockingFailureException.class})
+    public ResponseEntity<ErrorResponse> handleOptimisticLocking(Exception ex, HttpServletRequest request) {
+        return buildResponse(
+                "Resource was modified concurrently. Please retry.",
+                HttpStatus.CONFLICT,
+                request
+        );
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(

@@ -126,15 +126,9 @@ public class ProductServiceImpl implements ProductService {
         var oldPrice = product.getPrice();
         product.setPrice(request.newPrice());
 
-        try {
-            Product updated = repository.save(product);
-            log.info("Product price changed id={} oldPrice={} newPrice={}",
-                    updated.getId(), oldPrice, updated.getPrice());
-            return mapper.toResponse(updated);
-        } catch (OptimisticLockException e) {
-            log.warn("Concurrent update detected for product id={}", id);
-            throw new OptimisticLockException("Product was updated concurrently. Please retry.");
-        }
+        Product updated = repository.save(product);
+        log.info("Product price changed id={} oldPrice={} newPrice={}", updated.getId(), oldPrice, updated.getPrice());
+        return mapper.toResponse(updated);
     }
 
     /**
