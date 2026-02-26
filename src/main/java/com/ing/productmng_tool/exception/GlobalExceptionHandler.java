@@ -5,12 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import jakarta.persistence.OptimisticLockException;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -53,16 +53,6 @@ public class GlobalExceptionHandler {
         return buildResponse("Database constraint violation", HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(OptimisticLockException.class)
-    public ResponseEntity<ErrorResponse> handleOptimisticLock(
-            OptimisticLockException ex,
-            HttpServletRequest request) {
-
-        return buildResponse("Resource was modified concurrently. Please retry.",
-                HttpStatus.CONFLICT,
-                request);
-    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
             MethodArgumentNotValidException ex,
@@ -92,6 +82,18 @@ public class GlobalExceptionHandler {
         return buildResponse(
                 "Resource was modified concurrently. Please retry.",
                 HttpStatus.CONFLICT,
+                request
+        );
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            AuthorizationDeniedException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                "Access is denied",
+                HttpStatus.FORBIDDEN,
                 request
         );
     }
