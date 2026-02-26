@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class ProductController {
      * @return created product with HTTP 201 (Created)
      */
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestBody ProductRequest request) {
 
@@ -58,6 +60,7 @@ public class ProductController {
      * @return product details with HTTP 200 (OK)
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
         return ResponseEntity.ok(service.getProductById(id));
     }
@@ -68,6 +71,7 @@ public class ProductController {
      * @return list of products with HTTP 200 (OK)
      */
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(service.getAllProducts());
     }
@@ -80,6 +84,7 @@ public class ProductController {
      * @return updated product with HTTP 200 (OK)
      */
     @PatchMapping("/{id}/price")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> changePrice(
             @PathVariable Long id,
             @Valid @RequestBody ChangePriceRequest request) {
@@ -94,6 +99,7 @@ public class ProductController {
      * @return HTTP 204 (No Content) if deletion succeeds
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         service.deleteProduct(id);
         return ResponseEntity.noContent().build();
