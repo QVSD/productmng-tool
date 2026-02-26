@@ -162,16 +162,30 @@ Sensitive data such as passwords or credentials are never logged.
 
 ## Testing
 
-Unit tests focus on the service layer.
+The application includes both unit and web-layer tests.
 
-* Business logic validation
-* Exception scenarios
-* Price update behavior
+### Service Layer (Unit Tests)
+
+- Business logic validation
+- Happy path scenarios
+- Exception scenarios (not found, duplicate)
+- Concurrency behavior
+- Price update behavior
 
 Mockito is used to isolate dependencies.
 
-Controller and repository layers are not unit-tested
-as they are framework-driven components.
+### Web Layer Tests
+
+Using `@WebMvcTest`:
+
+- 200 OK responses for valid requests
+- 400 for validation failures
+- 404 for missing resources
+- 401 for unauthenticated requests
+- 403 for insufficient roles
+
+Security configuration and global exception handling
+are validated through dedicated web-layer tests.
 
 ---
 
