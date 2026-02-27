@@ -7,11 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-
+import org.springframework.web.servlet.NoHandlerFoundException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -94,6 +95,31 @@ public class GlobalExceptionHandler {
         return buildResponse(
                 "Access is denied",
                 HttpStatus.FORBIDDEN,
+                request
+        );
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(
+            NoHandlerFoundException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                "Endpoint not found",
+                HttpStatus.NOT_FOUND,
+                request
+        );
+    }
+
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                "HTTP method not supported",
+                HttpStatus.METHOD_NOT_ALLOWED,
                 request
         );
     }
