@@ -19,24 +19,34 @@ A production-oriented Spring Boot REST API designed as a store management tool.
 
 ## Architecture Overview
 
-The project follows a layered architecture:
+This application follows a layered architecture based on separation of concerns principles.
 
-controller -> service -> repository -> database
+The system is structured into the following layers:
 
-### Structure
+- Controller Layer – Handles HTTP requests and response mapping.
+- Service Layer – Contains business logic and transactional boundaries.
+- Repository Layer – Responsible for data persistence using Spring Data JPA.
+- Domain Model – JPA entities representing the core business objects.
+- Security Layer – Handles authentication, authorization and request filtering.
+- Exception Handling Layer – Centralized error handling with consistent API responses.
+
+### Package Structure
 
 ```
-
-controller
-service
-repository
-model (entity + dto)
-mapper
-security
-exception
-config
-
-````
+com.ing.productmng_tool
+|
+|---config          # Infrastructure configuration
+|---controller      # REST controllers
+|---service         # Service interfaces
+    |--service.impl # Service implementations
+|---repository      # Spring Data JPA repositories
+|---model
+|   |-- entity      # JPA entities
+|   |-- dto         # Request / Response DTOs
+|--- mapper         # Manual entity-DTO mapping
+|--- security       # Security configuration and handlers
+|--- exception      # Custom exceptions and global exception handler
+```
 
 ### Design Principles
 
@@ -227,10 +237,15 @@ If extended for a real-world production system:
 
 ## Assumptions
 
-* Minimal role model (USER / ADMIN)
-* PostgreSQL used for realistic persistence
-* API designed as standalone service
-
+- The system is designed as a standalone REST API (no UI layer).
+- A minimal role model is used (USER and ADMIN) for simplicity.
+- HTTP Basic authentication is sufficient for the scope of this assignment.
+- PostgreSQL is used as the persistence layer to simulate a production-like environment.
+- Product names are assumed to be unique.
+- The application is not horizontally scaled (single-instance deployment assumed).
+- No external integrations (payment, inventory sync) are considered.
+- Concurrency is handled using optimistic locking.
+- No soft-delete mechanism is implemented; delete operations permanently remove data.
 ---
 
 ## Author
